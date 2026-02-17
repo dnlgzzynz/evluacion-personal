@@ -882,6 +882,516 @@ Incluye: newsletters, RSS feeds, repositorios GitHub que seguir, hashtags, alert
 **Prompt de re-investigación**: genera aquí un prompt que Daniel pueda usar en 3-6 meses para hacer una nueva pasada de investigación sobre este mismo tema y comparar contra lo que sabe hoy.`;
   };
 
+  const generateDataAnalystPrompt = (source, gapTitle, context) => {
+    const isGardner = source === "gardner";
+    const entityContext = isGardner
+      ? `inteligencia cognitiva ${context.profileName} y sus manifestaciones observables`
+      : `dominio "${context.domain}" — perfil ${context.profileName}`;
+
+    return `# DATA ANALYST PROMPT — MODELADO Y ESTRUCTURACIÓN DE DATOS
+## Rol
+Eres un arquitecto de datos senior especializado en modelado relacional, normalización y diseño de esquemas para entornos AEC (Architecture, Engineering & Construction). Tu misión es convertir el conocimiento del dominio "${gapTitle}" en estructuras de datos precisas, reutilizables y relacionables con el resto del stack de datos de BAC Consulting.
+
+## Contexto
+**Daniel Yanez** — CEO BAC Consulting, stack activo: PostgreSQL, Airtable, Power BI, n8n, Python (pandas), React.
+- Dominio bajo análisis: **${entityContext}**
+- Nivel actual en el dominio: **${context.avgLevel}%**
+- Fortalezas existentes: ${context.strengths}
+- Perfiles relacionados en su stack: BIM Management, Revit API, Automatización, IA/ML, DevOps, Negocio
+
+## Objetivo
+Diseñar el modelo de datos canónico para "${gapTitle}": entidades, atributos, relaciones, estándares de nomenclatura, KPIs, pipeline y conexiones con los otros 9 perfiles del dashboard de Daniel. El resultado debe ser implementable esta semana en PostgreSQL o Airtable.
+
+## Reglas de oro
+1. **Tablas siempre**: esquemas, atributos, relaciones y queries en formato tabla o SQL block
+2. **Nombres en snake_case**: todas las entidades y atributos en snake_case inglés + comentario español
+3. **Tipos de dato explícitos**: VARCHAR(n), INTEGER, DECIMAL(p,s), BOOLEAN, TIMESTAMP, UUID, JSONB
+4. **Normalización mínima 3NF**: sin redundancia, sin dependencias transitivas
+5. **Mermaid para ER**: usa bloques \`\`\`mermaid erDiagram para todos los diagramas entidad-relación
+6. **Contexto AEC siempre**: todos los ejemplos con datos reales de proyectos de construcción o BIM
+7. **Español**: responde en español, términos técnicos en inglés entre paréntesis
+
+---
+
+## 0. QUICK SCHEMA — Esqueleto en 5 minutos
+Las 3-5 entidades CORE de este dominio, con sus 3 atributos más importantes cada una.
+Formato SQL directo — sin explicación extra, solo el esquema esencial para empezar.
+\`\`\`sql
+-- Schema mínimo viable para: ${gapTitle}
+CREATE TABLE ...
+\`\`\`
+
+---
+
+## 1. INVENTARIO DE ENTIDADES
+Todas las entidades (objetos del mundo real) que existen en este dominio:
+| Entidad | Nombre tabla | Descripción | Tipo (maestro/transaccional/catálogo) | Volumen estimado |
+|---|---|---|---|---|
+Para cada entidad: qué representa, quién la crea, con qué frecuencia cambia.
+Clasifica en:
+- **Entidades maestro** (datos de referencia: proyectos, usuarios, elementos BIM)
+- **Entidades transaccionales** (eventos: inspecciones, versiones, aprobaciones)
+- **Entidades de catálogo** (lookup: estados, tipos, categorías)
+
+---
+
+## 2. ATRIBUTOS Y TIPOS DE DATOS
+Para las 5 entidades más importantes, esquema completo:
+\`\`\`sql
+CREATE TABLE nombre_entidad (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  -- atributos con tipo, constraint y comentario
+  created_at      TIMESTAMP DEFAULT NOW(),
+  updated_at      TIMESTAMP DEFAULT NOW()
+);
+\`\`\`
+Tabla complementaria:
+| Atributo | Tipo | Constraint | Valor por defecto | Validación AEC | Ejemplo real |
+|---|---|---|---|---|---|
+
+---
+
+## 3. RELACIONES Y CARDINALIDADES
+Mapa completo de relaciones entre entidades:
+\`\`\`mermaid
+erDiagram
+  ENTIDAD_A ||--o{ ENTIDAD_B : "tiene"
+  ENTIDAD_B }|--|{ ENTIDAD_C : "pertenece a"
+\`\`\`
+Tabla de relaciones:
+| Entidad origen | Relación | Entidad destino | Cardinalidad | FK / Tabla pivote | Descripción |
+|---|---|---|---|---|---|
+Para relaciones N:M: definir la tabla pivote con sus atributos propios.
+
+---
+
+## 4. ESQUEMA NORMALIZADO — 3NF completo
+Script SQL completo con todas las tablas, FKs, índices y constraints:
+\`\`\`sql
+-- Esquema normalizado completo para: ${gapTitle}
+-- Versión: 1.0 | Dominio: ${context.domain}
+
+...tablas en orden de dependencia (maestros primero, transaccionales después)...
+
+-- Índices de rendimiento
+CREATE INDEX ...
+
+-- Constraints de integridad
+ALTER TABLE ...
+\`\`\`
+
+---
+
+## 5. NOMENCLATURA Y ESTÁNDARES
+Convenciones obligatorias para este dominio en BAC:
+| Elemento | Estándar | Ejemplo correcto | Ejemplo incorrecto | Razón |
+|---|---|---|---|---|
+| Nombres de tabla | plural snake_case | \`bim_elements\` | \`BIMElement\` | … |
+| Nombres de columna | snake_case | \`created_at\` | \`CreatedAt\` | … |
+| PKs | UUID o BIGSERIAL | \`id UUID\` | \`id INT\` | … |
+| FKs | \`{tabla}_id\` | \`project_id\` | \`projectId\` | … |
+| Enumeraciones | tabla catálogo | \`element_types\` | \`ENUM()\` | … |
+| Timestamps | UTC siempre | \`TIMESTAMP\` | \`DATE\` | … |
+${isGardner ? "| Métricas cognitivas | DECIMAL(5,2) | `intelligence_level` | `level_text` | … |" : "| Códigos BIM | VARCHAR(50) | `bim_code` | `code` | … |"}
+Incluye: prefijos de schema (\`bac_\`, \`bim_\`, \`ops_\`), versionado de esquemas, política de soft-delete.
+
+---
+
+## 6. TABLAS DE CATÁLOGO Y LOOKUP
+Todas las tablas de referencia necesarias para este dominio:
+\`\`\`sql
+-- Ejemplo de tabla catálogo
+CREATE TABLE ${isGardner ? "intelligence_levels" : "element_status_types"} (
+  id    SMALLINT PRIMARY KEY,
+  code  VARCHAR(20) UNIQUE NOT NULL,
+  label VARCHAR(100) NOT NULL,
+  ...
+);
+INSERT INTO ... VALUES ...;
+\`\`\`
+Tabla resumen de catálogos:
+| Tabla catálogo | Valores típicos | Usado por | Frecuencia de cambio |
+|---|---|---|---|
+
+---
+
+## 7. MÉTRICAS, KPIs E INDICADORES
+Qué medir en este dominio para tomar decisiones en BAC:
+| KPI | Fórmula / Definición | Tabla(s) fuente | Frecuencia | Umbral alerta | Vista / Dashboard |
+|---|---|---|---|---|---|
+Para los 3 KPIs más importantes: query SQL completa:
+\`\`\`sql
+-- KPI: nombre
+SELECT ...
+FROM ...
+WHERE ...
+GROUP BY ...;
+\`\`\`
+
+---
+
+## 8. PIPELINE DE DATOS
+Cómo fluyen los datos de extremo a extremo:
+\`\`\`mermaid
+flowchart LR
+  A[Fuente: ${isGardner ? "Evaluación / Ejercicio" : "Proyecto / Revit / BIM 360"}]
+  --> B[Ingesta: n8n / API / CSV]
+  --> C[Staging: PostgreSQL raw]
+  --> D[Transformación: dbt / Python]
+  --> E[Producción: esquema normalizado]
+  --> F[Consumo: Power BI / React / API]
+\`\`\`
+Para cada etapa: herramienta recomendada del stack de Daniel, formato de datos, frecuencia de actualización, responsable.
+
+---
+
+## 9. CONEXIONES INTER-PERFIL
+Cómo este modelo de datos se relaciona con los otros perfiles del dashboard de Daniel:
+| Perfil BAC | Entidad compartida | Tipo de join | Campo de unión | Caso de uso |
+|---|---|---|---|---|
+| BIM Management | … | … | … | … |
+| Revit API | … | … | … | … |
+| Automatización | … | … | … | … |
+| IA/ML | … | … | … | … |
+| DevOps | … | … | … | … |
+| Negocio | … | … | … | … |
+Propuesta de **esquema maestro BAC**: tabla de integración que une los 10 dominios con un ID de proyecto universal.
+
+---
+
+## 10. IMPLEMENTACIÓN EN PRODUCCIÓN
+Guía paso a paso para desplegar este esquema esta semana:
+
+### Opción A — PostgreSQL (recomendada para datos relacionales complejos)
+\`\`\`bash
+# Setup en Docker (stack de Daniel)
+docker run --name bac-db -e POSTGRES_PASSWORD=... -p 5432:5432 -d postgres:16
+psql -U postgres -c "CREATE DATABASE bac_${context.profileName.toLowerCase().replace(/\s+/g, '_')};"
+\`\`\`
+
+### Opción B — Airtable (rápida para prototipos y dashboards)
+Estructura de bases, campos y relaciones equivalentes al esquema SQL.
+
+### Sincronización con n8n
+Workflow de n8n para alimentar la base desde las fuentes del dominio:
+| Trigger | Fuente | Transformación | Destino | Frecuencia |
+|---|---|---|---|---|
+
+---
+
+## 11. QUERIES CLAVE
+Las 10 queries más útiles para este dominio (copia y usa directamente):
+\`\`\`sql
+-- Q1: [descripción]
+SELECT ...;
+
+-- Q2: [descripción]
+SELECT ...;
+
+-- ... hasta Q10
+\`\`\`
+Para cada query: propósito, inputs esperados, output, índice requerido.
+
+---
+
+## 12. MANTENIMIENTO Y EVOLUCIÓN DEL ESQUEMA
+| Tarea | Frecuencia | Herramienta | Script / Comando | Señal de que algo va mal |
+|---|---|---|---|---|
+| Backup | Diario | pg_dump / Docker volume | \`pg_dump bac_db > backup.sql\` | … |
+| Vacío y análisis | Semanal | VACUUM ANALYZE | … | … |
+| Revisión de índices | Mensual | pg_stat_user_indexes | … | … |
+| Migración de esquema | Por release | Flyway / Alembic | … | … |
+| Auditoría de datos | Trimestral | Query manual | … | … |
+**Política de versionado**: cómo numerar versiones del esquema (semver: MAJOR.MINOR.PATCH) y cuándo hacer breaking changes.
+**Prompt de revisión**: genera aquí un prompt para revisar este esquema en 6 meses cuando el dominio haya evolucionado.`;
+  };
+
+  const generateDiagramPrompt = (source, gapTitle, context) => {
+    const isGardner = source === "gardner";
+    const domainLabel = isGardner
+      ? `Inteligencia ${context.profileName} (Gardner)`
+      : `${context.profileName} — ${gapTitle}`;
+
+    return `# DIAGRAM PROMPT — EL DIAGRAMA PERFECTO
+## Rol
+Eres un arquitecto visual y experto en documentación técnica mediante diagramas. Tu especialidad es convertir sistemas complejos en diagramas que sean simultáneamente **precisos, legibles y accionables**. Dominas Mermaid, PlantUML, dbdiagram.io, C4 Model y notación UML. Cada diagrama que produces cumple un propósito específico y puede mantenerse como código en un repositorio.
+
+## Contexto
+**Daniel Yanez** — CEO BAC Consulting. Necesita documentar y visualizar el dominio "${domainLabel}" de manera que:
+1. Cualquier colaborador de BAC entienda el sistema en <5 minutos
+2. Los diagramas sean mantenibles como código (diagrams-as-code)
+3. Exista un diagrama para cada audiencia: técnica, estratégica y operativa
+- Nivel actual en el dominio: **${context.avgLevel}%**
+- Herramientas disponibles: VS Code + extensión Mermaid, dbdiagram.io, Excalidraw, Notion, GitHub
+
+## Objetivo
+Generar el conjunto completo de diagramas para "${gapTitle}": desde el ER de base de datos hasta el diagrama de arquitectura del sistema, pasando por flujos de proceso, secuencias y el mapa maestro que conecta este dominio con los otros 9 perfiles de BAC.
+
+## Reglas de oro
+1. **Mermaid primero**: todos los diagramas en bloques \`\`\`mermaid — deben renderizar sin errores
+2. **Un diagrama = un propósito**: cada diagrama tiene una pregunta específica que responde
+3. **Audiencia explícita**: indica quién lee cada diagrama (dev / CEO / cliente / ops)
+4. **Sintaxis válida**: verifica la sintaxis antes de entregar — sin nodos sueltos ni flechas rotas
+5. **Comentarios en los diagramas**: cada nodo importante con nota o descripción
+6. **Español en labels**: los labels de los diagramas en español, código en inglés
+7. **Escala apropiada**: el diagrama mínimo viable que responde la pregunta — sin over-engineering
+
+---
+
+## 0. EL DIAGRAMA MÍNIMO VIABLE — Empieza aquí
+El único diagrama que Daniel necesita entender si solo tiene 2 minutos.
+Máximo 10-12 nodos. Captura la esencia del sistema completo.
+\`\`\`mermaid
+graph TD
+  ...
+\`\`\`
+**Por qué este diagrama**: qué pregunta responde y por qué es el más importante.
+
+---
+
+## 1. DIAGRAMA ENTIDAD-RELACIÓN (ER)
+El esquema de datos completo del dominio en sintaxis Mermaid erDiagram:
+\`\`\`mermaid
+erDiagram
+  ENTIDAD_A {
+    uuid id PK
+    string nombre
+    ...
+  }
+  ENTIDAD_A ||--o{ ENTIDAD_B : "tiene"
+  ...
+\`\`\`
+Versión complementaria en **dbdiagram.io** (sintaxis DBML):
+\`\`\`
+Table entidad_a {
+  id uuid [pk]
+  nombre varchar
+  ...
+}
+Ref: entidad_a.id < entidad_b.entidad_a_id
+\`\`\`
+**Audiencia**: desarrolladores y arquitectos de datos.
+
+---
+
+## 2. DIAGRAMA DE CLASES (UML)
+Si el dominio tiene lógica orientada a objetos (Revit API, plugins, modelos de IA):
+\`\`\`mermaid
+classDiagram
+  class ClasePrincipal {
+    +String atributo
+    +metodo() ReturnType
+  }
+  ClasePrincipal <|-- ClaseHija
+  ClasePrincipal o-- ClaseCompuesta
+\`\`\`
+Si no aplica OOP directamente: presenta un **diagrama de módulos** mostrando las responsabilidades del sistema.
+**Audiencia**: desarrolladores que implementan el sistema.
+
+---
+
+## 3. DIAGRAMA DE FLUJO DE DATOS (DFD)
+Nivel 0 — Vista de contexto (el sistema como caja negra):
+\`\`\`mermaid
+graph LR
+  Actor1([Actor externo]) -->|datos de entrada| Sistema[Sistema: ${gapTitle}]
+  Sistema -->|datos de salida| Actor2([Destinatario])
+\`\`\`
+Nivel 1 — Procesos internos principales:
+\`\`\`mermaid
+graph TD
+  ...descomposición del sistema en 4-7 procesos...
+\`\`\`
+**Audiencia**: analistas de negocio y product owners.
+
+---
+
+## 4. DIAGRAMA DE SECUENCIA
+Los 2-3 flujos más importantes del sistema como secuencia de mensajes:
+\`\`\`mermaid
+sequenceDiagram
+  actor Daniel
+  participant Sistema as ${isGardner ? "App Evaluación" : "BAC System"}
+  participant DB as PostgreSQL
+  participant IA as Claude/Perplexity
+
+  Daniel->>Sistema: acción principal
+  Sistema->>DB: query
+  DB-->>Sistema: resultado
+  Sistema-->>Daniel: respuesta
+\`\`\`
+Un diagrama de secuencia por cada flujo clave: crear, consultar, actualizar, integrar.
+**Audiencia**: desarrolladores back-end y arquitectos de integración.
+
+---
+
+## 5. DIAGRAMA DE ARQUITECTURA — C4 Model
+**Nivel 1 — Contexto del sistema**:
+\`\`\`mermaid
+graph TB
+  subgraph "Sistemas externos"
+    Revit[Revit / BIM 360]
+    n8n[n8n Workflows]
+    AI[Claude / Perplexity]
+  end
+  subgraph "BAC System"
+    App[Dashboard React]
+    API[API / Backend]
+    DB[(PostgreSQL)]
+  end
+  Daniel((Daniel)) --> App
+  App --> API
+  API --> DB
+  n8n --> API
+  Revit --> n8n
+\`\`\`
+**Nivel 2 — Contenedores** (zoom al sistema BAC):
+\`\`\`mermaid
+graph LR
+  ...desglose en contenedores: frontend, backend, DB, workers, cache...
+\`\`\`
+**Audiencia**: arquitectos de software y CTO.
+
+---
+
+## 6. DIAGRAMA DE ESTADOS
+Para los objetos que tienen ciclo de vida (proyectos, tareas, aprobaciones, elementos BIM):
+\`\`\`mermaid
+stateDiagram-v2
+  [*] --> Borrador
+  Borrador --> EnRevision : enviar
+  EnRevision --> Aprobado : aprobar
+  EnRevision --> Rechazado : rechazar
+  Rechazado --> Borrador : corregir
+  Aprobado --> [*]
+\`\`\`
+Para cada estado: qué acciones son posibles, quién las ejecuta, qué datos cambian.
+**Audiencia**: product owners y equipos de operaciones.
+
+---
+
+## 7. DIAGRAMA DE FLUJO DE PROCESO — OPERATIVO
+El proceso paso a paso de cómo se usa este conocimiento en un proyecto BAC real:
+\`\`\`mermaid
+flowchart TD
+  A([Inicio: requerimiento cliente]) --> B{¿Datos disponibles?}
+  B -->|Sí| C[Proceso principal]
+  B -->|No| D[Recolectar datos]
+  D --> C
+  C --> E{¿Validación OK?}
+  E -->|Sí| F[Entregable]
+  E -->|No| G[Corregir]
+  G --> C
+  F --> H([Fin: cliente recibe resultado])
+\`\`\`
+Incluye: actores responsables de cada paso, herramientas usadas, tiempo estimado, puntos de decisión.
+**Audiencia**: equipo operativo de BAC y clientes.
+
+---
+
+## 8. DIAGRAMA DE GANTT — IMPLEMENTACIÓN
+Roadmap de implementación de este dominio en BAC:
+\`\`\`mermaid
+gantt
+  title Implementación: ${gapTitle}
+  dateFormat YYYY-MM-DD
+  section Fase 1: Fundamentos
+    Diseño de esquema        :a1, 2026-02-17, 7d
+    Setup base de datos      :a2, after a1, 5d
+  section Fase 2: Integración
+    Conexión con n8n         :b1, after a2, 10d
+    Dashboard Power BI       :b2, after b1, 7d
+  section Fase 3: Producción
+    Testing y validación     :c1, after b2, 5d
+    Deploy y monitoreo       :c2, after c1, 3d
+\`\`\`
+**Audiencia**: CEO (Daniel) y stakeholders de BAC.
+
+---
+
+## 9. MAPA DE DEPENDENCIAS ENTRE PERFILES BAC
+Cómo este dominio se conecta con los otros 9 perfiles del dashboard de Daniel:
+\`\`\`mermaid
+graph LR
+  DOM[${context.profileName}]
+  DOM -->|alimenta| BIM[BIM Management]
+  DOM -->|usa datos de| AUTO[Automatización]
+  DOM <-->|bidireccional| IA[IA/ML]
+  NEG[Negocio] -->|prioriza| DOM
+  DEV[DevOps] -->|despliega| DOM
+\`\`\`
+Tabla de dependencias:
+| Perfil conectado | Tipo de relación | Dato compartido | Dirección | Impacto si falla |
+|---|---|---|---|---|
+**Audiencia**: arquitecto de soluciones y CEO.
+
+---
+
+## 10. DIAGRAMA DE MAPA MENTAL — CONCEPTUAL
+Estructura de conocimiento del dominio en formato árbol:
+\`\`\`mermaid
+mindmap
+  root((${gapTitle}))
+    Conceptos core
+      Concepto A
+      Concepto B
+    Herramientas
+      Tool 1
+      Tool 2
+    Procesos
+      Proceso A
+      Proceso B
+    Conexiones BAC
+      Perfil 1
+      Perfil 2
+\`\`\`
+**Audiencia**: onboarding de nuevos colaboradores, presentaciones a clientes.
+
+---
+
+## 11. VERSIÓN EXPORTABLE — PRESENTACIÓN
+Instrucciones para recrear el diagrama más importante en herramientas visuales:
+
+### Excalidraw / FigJam
+- Estructura de capas recomendada
+- Colores del sistema BAC: verde #4a9d4a, naranja #f97316, azul #3b99f1
+- Tipografía y tamaños estándar
+- Cómo exportar como SVG para embed en documentos
+
+### Notion / Confluence
+- Bloque Mermaid nativo: cómo insertar y mantener actualizado
+- Estructura de página recomendada para documentar este dominio
+
+### GitHub README
+- Badge de estado del diagrama
+- \`\`\`mermaid block en README.md
+- Cómo auto-generar PNG con GitHub Actions
+
+---
+
+## 12. SISTEMA DE DIAGRAMAS VIVO — DIAGRAMS AS CODE
+Para que los diagramas no queden obsoletos:
+\`\`\`
+bac-consulting/
+├── docs/
+│   └── diagrams/
+│       ├── ${context.profileName.toLowerCase().replace(/\s+/g, '-')}/
+│       │   ├── er-diagram.mmd
+│       │   ├── architecture.mmd
+│       │   ├── sequence-main-flow.mmd
+│       │   └── README.md
+│       └── master-bac-architecture.mmd
+\`\`\`
+**Workflow de mantenimiento**:
+| Trigger | Diagrama a actualizar | Herramienta | Tiempo estimado |
+|---|---|---|---|
+| Nuevo feature | Secuencia + Flujo | VS Code Mermaid | 15 min |
+| Cambio de esquema DB | ER + Clases | dbdiagram.io | 20 min |
+| Nueva integración | Arquitectura C4 | Mermaid | 30 min |
+| Nuevo perfil BAC | Mapa de dependencias | Mermaid | 10 min |
+**Prompt de revisión de diagramas**: genera aquí un prompt para auditar todos los diagramas de este dominio en 3 meses y detectar qué quedó desactualizado.`;
+  };
+
   const allGaps = useMemo(() => {
     const gaps = [];
     PROFILES.forEach(p => {
@@ -899,6 +1409,8 @@ Incluye: newsletters, RSS feeds, repositorios GitHub que seguir, hashtags, alert
           key, type: "profile", source: p.name, sourceIcon: p.icon, sourceColor: p.color, title: g,
           prompt: generatePrompt("profile", g, c),
           researchPrompt: generateResearchPrompt("profile", g, c),
+          dataPrompt: generateDataAnalystPrompt("profile", g, c),
+          diagramPrompt: generateDiagramPrompt("profile", g, c),
         });
       });
       const sortedSkills = [...p.skills].sort((a, b) => (b.target - b.level) - (a.target - a.level));
@@ -912,6 +1424,8 @@ Incluye: newsletters, RSS feeds, repositorios GitHub que seguir, hashtags, alert
             title: `${sk.name} (${sk.level}% → ${sk.target}%, gap: ${gap}pts)`,
             prompt: generatePrompt("skill", sk.name, c),
             researchPrompt: generateResearchPrompt("skill", sk.name, c),
+            dataPrompt: generateDataAnalystPrompt("skill", sk.name, c),
+            diagramPrompt: generateDiagramPrompt("skill", sk.name, c),
           });
         }
       });
@@ -930,6 +1444,8 @@ Incluye: newsletters, RSS feeds, repositorios GitHub que seguir, hashtags, alert
           key, type: "gardner", source: g.name, sourceIcon: g.icon, sourceColor: g.color, title: d,
           prompt: generatePrompt("gardner", d, c),
           researchPrompt: generateResearchPrompt("gardner", d, c),
+          dataPrompt: generateDataAnalystPrompt("gardner", d, c),
+          diagramPrompt: generateDiagramPrompt("gardner", d, c),
         });
       });
     });
@@ -1654,10 +2170,12 @@ Incluye: newsletters, RSS feeds, repositorios GitHub que seguir, hashtags, alert
         <div style={{ maxWidth: 850, margin: "0 auto" }}>
 
           {/* Mode switcher */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 18 }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 18, flexWrap: "wrap" }}>
             {[
-              { id: "learning", icon: "📚", label: "Aprendizaje", desc: "Cerrar brechas · dominio técnico", accent: T.accent, accentDim: T.accentDim, border: "rgba(74,157,74,0.5)" },
-              { id: "research", icon: "🔬", label: "Investigación", desc: "Estado del arte · nuevas herramientas", accent: T.purple, accentDim: T.purpleDim, border: "rgba(249,115,22,0.5)" },
+              { id: "learning",  icon: "📚", label: "Aprendizaje",      desc: "Cerrar brechas · dominio técnico",         accent: T.accent,    accentDim: T.accentDim,  border: "rgba(74,157,74,0.5)" },
+              { id: "research",  icon: "🔬", label: "Investigación",     desc: "Estado del arte · herramientas nuevas",    accent: T.purple,    accentDim: T.purpleDim,  border: "rgba(249,115,22,0.5)" },
+              { id: "data",      icon: "📊", label: "Analista de Datos", desc: "Modelado · esquemas · KPIs · pipelines",   accent: T.accentAlt, accentDim: "rgba(59,153,241,0.14)", border: "rgba(59,153,241,0.5)" },
+              { id: "diagram",   icon: "📐", label: "Diagramas",         desc: "ER · Arquitectura · Flujos · C4 · Mermaid", accent: "#a78bfa",   accentDim: "rgba(167,139,250,0.14)", border: "rgba(167,139,250,0.5)" },
             ].map(m => (
               <button key={m.id} onClick={() => setPromptMode(m.id)}
                 style={{
@@ -1680,15 +2198,13 @@ Incluye: newsletters, RSS feeds, repositorios GitHub que seguir, hashtags, alert
 
           <div style={{ textAlign: "center", marginBottom: 16 }}>
             <h2 style={{ fontSize: 16, fontWeight: 800, margin: "0 0 4px" }}>
-              {promptMode === "learning" ? "📚 Prompts de Aprendizaje" : "🔬 Prompts de Investigación"}
+              {{ learning: "📚 Prompts de Aprendizaje", research: "🔬 Prompts de Investigación", data: "📊 Analista de Datos", diagram: "📐 Diagramas" }[promptMode]}
             </h2>
             <p style={{ fontSize: 11, color: T.textDim, margin: "0 0 4px" }}>
-              {promptMode === "learning"
-                ? "Cerrar brechas · dominio técnico · ciclo de mejora continua"
-                : "Estado del arte · herramientas emergentes · oportunidades de mercado BAC"}
+              {{ learning: "Cerrar brechas · dominio técnico · ciclo de mejora continua", research: "Estado del arte · herramientas emergentes · oportunidades de mercado BAC", data: "Modelado relacional · esquemas normalizados · KPIs · pipelines · conexiones inter-perfil", diagram: "ER · Arquitectura C4 · Flujos · Secuencias · Mermaid as code · Diagrams-as-code" }[promptMode]}
             </p>
             <p style={{ fontSize: 10, color: T.textDim, margin: 0 }}>
-              {allGaps.length} brechas · Copia → Pega en Claude / Perplexity → {promptMode === "learning" ? "Aprende" : "Investiga"} → Repite
+              {allGaps.length} brechas · Copia → Pega en Claude / Perplexity → {{ learning: "Aprende", research: "Investiga", data: "Modela", diagram: "Diagrama" }[promptMode]} → Repite
             </p>
           </div>
 
@@ -1728,8 +2244,10 @@ Incluye: newsletters, RSS feeds, repositorios GitHub que seguir, hashtags, alert
           {/* Prompt Cards */}
           <div style={{ display: "grid", gap: 10 }}>
             {filteredGaps.map((gap) => {
-              const editKey = promptMode === "research" ? `r-${gap.key}` : gap.key;
-              const basePrompt = promptMode === "research" ? gap.researchPrompt : gap.prompt;
+              const prefixMap = { learning: "", research: "r-", data: "d-", diagram: "dg-" };
+              const promptFieldMap = { learning: "prompt", research: "researchPrompt", data: "dataPrompt", diagram: "diagramPrompt" };
+              const editKey = `${prefixMap[promptMode]}${gap.key}`;
+              const basePrompt = gap[promptFieldMap[promptMode]];
               const isEdited = promptEdits[editKey] !== undefined;
               const currentPrompt = isEdited ? promptEdits[editKey] : basePrompt;
               return (
@@ -1753,11 +2271,11 @@ Incluye: newsletters, RSS feeds, repositorios GitHub que seguir, hashtags, alert
                         <div style={{ fontSize: 10, color: T.textDim, display: "flex", alignItems: "center", gap: 6 }}>
                           {gap.source} · {gap.type === "gardner" ? "Gardner" : gap.type === "skill" ? "Skill gap" : "Brecha"}
                           <span style={{ padding: "1px 6px", borderRadius: 999, fontSize: 9, fontWeight: 700,
-                            background: promptMode === "research" ? T.purpleDim : T.accentDim,
-                            color: promptMode === "research" ? T.purple : T.accent,
-                            border: `1px solid ${promptMode === "research" ? "rgba(249,115,22,0.3)" : "rgba(74,157,74,0.3)"}`,
+                            background: { learning: T.accentDim, research: T.purpleDim, data: "rgba(59,153,241,0.14)", diagram: "rgba(167,139,250,0.14)" }[promptMode],
+                            color: { learning: T.accent, research: T.purple, data: T.accentAlt, diagram: "#a78bfa" }[promptMode],
+                            border: `1px solid ${{ learning: "rgba(74,157,74,0.3)", research: "rgba(249,115,22,0.3)", data: "rgba(59,153,241,0.3)", diagram: "rgba(167,139,250,0.3)" }[promptMode]}`,
                           }}>
-                            {promptMode === "research" ? "🔬 Research" : "📚 Learn"}
+                            {{ learning: "📚 Learn", research: "🔬 Research", data: "📊 Data", diagram: "📐 Diagram" }[promptMode]}
                           </span>
                         </div>
                       </div>
