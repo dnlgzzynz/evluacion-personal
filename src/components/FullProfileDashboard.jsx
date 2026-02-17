@@ -6,13 +6,23 @@ import {
 } from "recharts";
 
 const T = {
-  bg: "#06080f", card: "#0d1117", cardAlt: "#161b22",
-  accent: "#00e5a0", accentDim: "#00e5a020", accentAlt: "#00b4d8",
-  purple: "#a78bfa", purpleDim: "#a78bfa20",
-  warning: "#f59e0b", warningDim: "#f59e0b20",
-  danger: "#ef4444", dangerDim: "#ef444420",
-  text: "#e6edf3", textDim: "#7d8590", border: "#21262d",
-  gold: "#ffd700", goldDim: "#ffd70020",
+  bg: "linear-gradient(135deg, #0a1f0a 0%, #172b52 50%, #282d38 100%)",
+  card: "rgba(40, 45, 56, 0.6)",
+  cardAlt: "rgba(40, 45, 56, 0.8)",
+  accent: "#4a9d4a",           // forest-400 — nivel alto
+  accentDim: "rgba(74, 157, 74, 0.14)",
+  accentAlt: "#3b99f1",        // sky-500
+  purple: "#f97316",           // lava-500 — highlight principal
+  purpleDim: "rgba(249, 115, 22, 0.14)",
+  warning: "#f97316",          // lava-500 — nivel medio
+  warningDim: "rgba(249, 115, 22, 0.14)",
+  danger: "#ef4444",
+  dangerDim: "rgba(239, 68, 68, 0.14)",
+  text: "#eef1f5",             // mountain-100
+  textDim: "#8593ad",          // mountain-500
+  border: "rgba(255, 255, 255, 0.1)",
+  gold: "#f97316",
+  goldDim: "rgba(249, 115, 22, 0.14)",
 };
 
 const PROFILES = [
@@ -705,7 +715,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
   const CustomTooltip = ({ active, payload }) => {
     if (!active || !payload?.length) return null;
     return (
-      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 12px", fontSize: 12, color: T.text }}>
+      <div style={{ background: T.cardAlt, backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: `1px solid ${T.border}`, borderRadius: 10, padding: "8px 12px", fontSize: 12, color: T.text, boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>
         {payload.map((p, i) => (
           <div key={i} style={{ color: p.color || p.fill, margin: "2px 0" }}>
             {p.name}: <strong>{p.value}%</strong>
@@ -716,14 +726,14 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
   };
 
   return (
-    <div style={{ fontFamily: "'DM Sans', 'Segoe UI', system-ui, sans-serif", background: T.bg, color: T.text, minHeight: "100vh", padding: "20px 12px" }}>
+    <div style={{ fontFamily: "'Outfit', 'Inter', 'Segoe UI', system-ui, sans-serif", background: T.bg, backgroundAttachment: "fixed", color: T.text, minHeight: "100vh", padding: "20px 12px" }}>
 
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: 24 }}>
-        <div style={{ display: "inline-block", padding: "3px 12px", background: T.accentDim, borderRadius: 16, fontSize: 10, color: T.accent, letterSpacing: 1.5, textTransform: "uppercase", fontWeight: 600, marginBottom: 8 }}>
+        <div style={{ display: "inline-block", padding: "4px 14px", background: T.purpleDim, borderRadius: 999, fontSize: 10, color: T.purple, letterSpacing: 2, textTransform: "uppercase", fontWeight: 700, marginBottom: 10, border: `1px solid rgba(249,115,22,0.25)`, boxShadow: `0 0 12px rgba(var(--lava-glow), 0.2)` }}>
           BAC · Evaluación Integral de Perfiles
         </div>
-        <h1 style={{ fontSize: 22, fontWeight: 800, margin: "6px 0", background: `linear-gradient(135deg, ${T.accent}, ${T.accentAlt}, ${T.purple})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+        <h1 style={{ fontSize: 24, fontWeight: 800, margin: "6px 0", background: `linear-gradient(135deg, ${T.accent}, ${T.accentAlt}, ${T.purple})`, WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           Daniel — Arquitecto AEC / CEO BAC
         </h1>
         <p style={{ color: T.textDim, fontSize: 12, margin: 0 }}>
@@ -739,7 +749,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
           { label: "Mayor brecha", value: biggestGap.gap + "pts", sub: biggestGap.fullName, color: T.danger },
           { label: "Perfiles", value: PROFILES.length.toString(), sub: "evaluados", color: T.accentAlt },
         ].map((c, i) => (
-          <div key={i} style={{ background: T.card, borderRadius: 10, padding: "14px 12px", border: `1px solid ${T.border}`, textAlign: "center" }}>
+          <div key={i} style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 14, padding: "14px 12px", border: `1px solid ${T.border}`, textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.25)" }}>
             <div style={{ fontSize: 24, fontWeight: 800, color: c.color }}>{c.value}</div>
             <div style={{ fontSize: 11, fontWeight: 600, marginTop: 2 }}>{c.label}</div>
             <div style={{ fontSize: 10, color: T.textDim, marginTop: 1 }}>{c.sub}</div>
@@ -760,11 +770,12 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
         ].map(tab => (
           <button key={tab.id} onClick={() => { setView(tab.id); if (tab.id !== "detail") setSelectedProfile(null); }}
             style={{
-              padding: "7px 14px", borderRadius: 7, fontSize: 11, fontWeight: 600,
-              border: view === tab.id ? `1px solid ${T.accent}` : `1px solid ${T.border}`,
-              background: view === tab.id ? T.accentDim : "transparent",
-              color: view === tab.id ? T.accent : T.textDim,
-              cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
+              padding: "7px 16px", borderRadius: 999, fontSize: 11, fontWeight: 600,
+              border: view === tab.id ? `1px solid rgba(249,115,22,0.5)` : `1px solid ${T.border}`,
+              background: view === tab.id ? T.purpleDim : "rgba(255,255,255,0.04)",
+              color: view === tab.id ? T.purple : T.textDim,
+              cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
+              boxShadow: view === tab.id ? `0 0 14px rgba(var(--lava-glow), 0.25)` : "none",
             }}
           >{tab.label}</button>
         ))}
@@ -779,11 +790,11 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
               {[{ k: "level", l: "Nivel" }, { k: "gap", l: "Brecha" }, { k: "name", l: "A-Z" }].map(s => (
                 <button key={s.k} onClick={() => setSortBy(s.k)}
                   style={{
-                    padding: "4px 10px", borderRadius: 5, fontSize: 10, fontWeight: 600,
-                    border: sortBy === s.k ? `1px solid ${T.accentAlt}` : `1px solid ${T.border}`,
-                    background: sortBy === s.k ? `${T.accentAlt}20` : "transparent",
+                    padding: "4px 12px", borderRadius: 999, fontSize: 10, fontWeight: 600,
+                    border: sortBy === s.k ? `1px solid rgba(59,153,241,0.5)` : `1px solid ${T.border}`,
+                    background: sortBy === s.k ? "rgba(59,153,241,0.12)" : "rgba(255,255,255,0.04)",
                     color: sortBy === s.k ? T.accentAlt : T.textDim,
-                    cursor: "pointer", fontFamily: "inherit",
+                    cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
                   }}
                 >{s.l}</button>
               ))}
@@ -796,12 +807,13 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
               return (
                 <div key={i} onClick={() => { setSelectedProfile(profile.id); setView("detail"); }}
                   style={{
-                    background: T.card, borderRadius: 10, padding: "12px 14px",
+                    background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+                    borderRadius: 14, padding: "12px 14px",
                     border: `1px solid ${T.border}`, cursor: "pointer",
-                    transition: "border-color 0.15s",
+                    transition: "all 0.2s", boxShadow: "0 2px 16px rgba(0,0,0,0.2)",
                   }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = d.color + "66"}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = T.border}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = d.color + "66"; e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = `0 8px 28px rgba(0,0,0,0.3), 0 0 0 1px ${d.color}22`; }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = T.border; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 2px 16px rgba(0,0,0,0.2)"; }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -831,7 +843,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
           </div>
 
           {/* Pie Chart Distribution */}
-          <div style={{ background: T.card, borderRadius: 12, border: `1px solid ${T.border}`, padding: 16, marginTop: 16 }}>
+          <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 16, border: `1px solid ${T.border}`, padding: 16, marginTop: 16, boxShadow: "0 4px 24px rgba(0,0,0,0.25)" }}>
             <h3 style={{ fontSize: 13, fontWeight: 700, marginBottom: 8, textAlign: "center" }}>Distribución de Madurez</h3>
             <ResponsiveContainer width="100%" height={180}>
               <PieChart>
@@ -840,7 +852,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
                 </Pie>
                 <Tooltip content={({ active, payload }) =>
                   active && payload?.[0] ? (
-                    <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 10px", fontSize: 11, color: T.text }}>
+                    <div style={{ background: T.cardAlt, backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: `1px solid ${T.border}`, borderRadius: 10, padding: "6px 10px", fontSize: 11, color: T.text, boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>
                       {payload[0].name}: <strong>{payload[0].value}</strong> perfiles
                     </div>
                   ) : null
@@ -861,7 +873,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
 
       {/* RADAR */}
       {view === "radar" && (
-        <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, padding: "16px 4px", maxWidth: 720, margin: "0 auto" }}>
+        <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 18, border: `1px solid ${T.border}`, padding: "16px 4px", maxWidth: 720, margin: "0 auto", boxShadow: "0 4px 32px rgba(0,0,0,0.3)" }}>
           <h2 style={{ textAlign: "center", fontSize: 14, fontWeight: 700, marginBottom: 2 }}>Radar Multi-Perfil</h2>
           <p style={{ textAlign: "center", fontSize: 10, color: T.textDim, marginBottom: 8 }}>Promedio actual vs. objetivo por perfil</p>
           <ResponsiveContainer width="100%" height={440}>
@@ -880,7 +892,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
 
       {/* GAPS */}
       {view === "gaps" && (
-        <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, padding: "16px 8px", maxWidth: 720, margin: "0 auto" }}>
+        <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 18, border: `1px solid ${T.border}`, padding: "16px 8px", maxWidth: 720, margin: "0 auto", boxShadow: "0 4px 32px rgba(0,0,0,0.3)" }}>
           <h2 style={{ textAlign: "center", fontSize: 14, fontWeight: 700, marginBottom: 2 }}>Análisis de Brechas por Perfil</h2>
           <p style={{ textAlign: "center", fontSize: 10, color: T.textDim, marginBottom: 12 }}>Puntos entre nivel actual y objetivo</p>
           <ResponsiveContainer width="100%" height={380}>
@@ -890,7 +902,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
               <YAxis dataKey="name" type="category" width={110} tick={{ fill: T.textDim, fontSize: 10 }} tickLine={false} axisLine={false} />
               <Tooltip content={({ active, payload, label }) =>
                 active && payload?.[0] ? (
-                  <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 10px", fontSize: 11, color: T.text }}>
+                  <div style={{ background: T.cardAlt, backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: `1px solid ${T.border}`, borderRadius: 10, padding: "6px 10px", fontSize: 11, color: T.text, boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>
                     <div style={{ fontWeight: 700 }}>{label}</div>
                     <div style={{ color: T.warning }}>Brecha: {payload[0].value} pts</div>
                     <div style={{ color: T.accent }}>Nivel actual: {payload[0].payload.level}%</div>
@@ -915,18 +927,19 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
             {PROFILES.map(p => (
               <button key={p.id} onClick={() => setSelectedProfile(p.id)}
                 style={{
-                  padding: "6px 12px", borderRadius: 8, fontSize: 11, fontWeight: 600,
-                  border: selectedProfile === p.id ? `1px solid ${p.color}` : `1px solid ${T.border}`,
-                  background: selectedProfile === p.id ? p.color + "18" : "transparent",
+                  padding: "6px 14px", borderRadius: 999, fontSize: 11, fontWeight: 600,
+                  border: selectedProfile === p.id ? `1px solid ${p.color}66` : `1px solid ${T.border}`,
+                  background: selectedProfile === p.id ? p.color + "18" : "rgba(255,255,255,0.04)",
                   color: selectedProfile === p.id ? p.color : T.textDim,
-                  cursor: "pointer", fontFamily: "inherit",
+                  cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
+                  boxShadow: selectedProfile === p.id ? `0 0 12px ${p.color}33` : "none",
                 }}
               >{p.icon} {p.name.split(" ")[0]}</button>
             ))}
           </div>
 
           {sp && (
-            <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${sp.color}33`, padding: 18 }}>
+            <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 18, border: `1px solid ${sp.color}33`, padding: 18, boxShadow: `0 4px 32px rgba(0,0,0,0.3), 0 0 0 1px ${sp.color}11` }}>
               <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
                 <span style={{ fontSize: 32 }}>{sp.icon}</span>
                 <div>
@@ -958,7 +971,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
 
               {/* 3-column insights */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
-                <div style={{ background: T.bg, borderRadius: 10, padding: 12, border: `1px solid ${T.border}` }}>
+                <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 12, border: `1px solid ${T.border}` }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: T.accent, marginBottom: 6 }}>✓ Fortalezas</div>
                   {sp.strengths.map((s, i) => (
                     <div key={i} style={{ fontSize: 11, color: T.textDim, marginBottom: 4, display: "flex", gap: 6 }}>
@@ -967,7 +980,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
                     </div>
                   ))}
                 </div>
-                <div style={{ background: T.bg, borderRadius: 10, padding: 12, border: `1px solid ${T.border}` }}>
+                <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 12, border: `1px solid ${T.border}` }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: T.warning, marginBottom: 6 }}>⚠ Brechas</div>
                   {sp.gaps.map((g, i) => (
                     <div key={i} style={{ fontSize: 11, color: T.textDim, marginBottom: 4, display: "flex", gap: 6 }}>
@@ -976,7 +989,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
                     </div>
                   ))}
                 </div>
-                <div style={{ background: T.bg, borderRadius: 10, padding: 12, border: `1px solid ${T.border}` }}>
+                <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: 12, border: `1px solid ${T.border}` }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: T.accentAlt, marginBottom: 6 }}>→ Próximos pasos</div>
                   {sp.nextSteps.map((n, i) => (
                     <div key={i} style={{ fontSize: 11, color: T.textDim, marginBottom: 4, display: "flex", gap: 6 }}>
@@ -1040,14 +1053,14 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
             <div key={pi} style={{ marginBottom: 14 }}>
               <div style={{
                 padding: "10px 14px", background: phase.color + "12",
-                borderRadius: "10px 10px 0 0", borderBottom: `2px solid ${phase.color}`,
+                borderRadius: "14px 14px 0 0", borderBottom: `2px solid ${phase.color}`,
               }}>
                 <span style={{ fontSize: 13, fontWeight: 700, color: phase.color }}>{phase.phase}</span>
                 <span style={{ fontSize: 10, color: T.textDim, marginLeft: 10 }}>
                   {phase.items.reduce((s, i) => s + i.hours, 0)}h totales
                 </span>
               </div>
-              <div style={{ background: T.card, borderRadius: "0 0 10px 10px", border: `1px solid ${T.border}`, borderTop: 0 }}>
+              <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: "0 0 14px 14px", border: `1px solid ${T.border}`, borderTop: 0 }}>
                 {phase.items.map((item, ii) => (
                   <div key={ii} style={{
                     padding: "10px 14px", display: "flex", justifyContent: "space-between",
@@ -1073,8 +1086,9 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
 
           {/* Summary */}
           <div style={{
-            background: T.card, borderRadius: 10, border: `1px solid ${T.border}`,
-            padding: 14, marginTop: 8, textAlign: "center",
+            background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+            borderRadius: 14, border: `1px solid ${T.border}`,
+            padding: 14, marginTop: 8, textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
           }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: T.accent, marginBottom: 6 }}>
               Inversión Total: ~400h en 9 meses · ~10h/semana
@@ -1117,7 +1131,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
                 { label: "En desarrollo", value: weakest.icon, sub: weakest.name, color: weakest.color },
                 { label: "Inteligencias", value: "8", sub: "evaluadas", color: T.accentAlt },
               ].map((c, i) => (
-                <div key={i} style={{ background: T.card, borderRadius: 10, padding: "14px 12px", border: `1px solid ${T.border}`, textAlign: "center" }}>
+                <div key={i} style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 14, padding: "14px 12px", border: `1px solid ${T.border}`, textAlign: "center", boxShadow: "0 4px 24px rgba(0,0,0,0.25)" }}>
                   <div style={{ fontSize: 24, fontWeight: 800, color: c.color }}>{c.value}</div>
                   <div style={{ fontSize: 11, fontWeight: 600, marginTop: 2 }}>{c.label}</div>
                   <div style={{ fontSize: 10, color: T.textDim, marginTop: 1 }}>{c.sub}</div>
@@ -1126,7 +1140,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
             </div>
 
             {/* Gardner Radar Chart */}
-            <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, padding: "16px 4px", marginBottom: 16 }}>
+            <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 18, border: `1px solid ${T.border}`, padding: "16px 4px", marginBottom: 16, boxShadow: "0 4px 32px rgba(0,0,0,0.3)" }}>
               <h3 style={{ textAlign: "center", fontSize: 13, fontWeight: 700, marginBottom: 2 }}>Perfil de Inteligencias</h3>
               <p style={{ textAlign: "center", fontSize: 10, color: T.textDim, marginBottom: 8 }}>Distribución de las 8 inteligencias múltiples</p>
               <ResponsiveContainer width="100%" height={380}>
@@ -1138,7 +1152,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
                   <Tooltip content={({ active, payload }) => {
                     if (!active || !payload?.length) return null;
                     return (
-                      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 8, padding: "8px 12px", fontSize: 12, color: T.text }}>
+                      <div style={{ background: T.cardAlt, backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: `1px solid ${T.border}`, borderRadius: 10, padding: "8px 12px", fontSize: 12, color: T.text, boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>
                         {payload.map((p, i) => (
                           <div key={i} style={{ color: p.color || p.fill, margin: "2px 0" }}>
                             {p.name}: <strong>{p.value}%</strong>
@@ -1152,7 +1166,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
             </div>
 
             {/* Gardner Bar Chart */}
-            <div style={{ background: T.card, borderRadius: 14, border: `1px solid ${T.border}`, padding: "16px 8px", marginBottom: 16 }}>
+            <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 18, border: `1px solid ${T.border}`, padding: "16px 8px", marginBottom: 16, boxShadow: "0 4px 32px rgba(0,0,0,0.3)" }}>
               <h3 style={{ textAlign: "center", fontSize: 13, fontWeight: 700, marginBottom: 2 }}>Ranking de Inteligencias</h3>
               <p style={{ textAlign: "center", fontSize: 10, color: T.textDim, marginBottom: 12 }}>Ordenado de mayor a menor nivel</p>
               <ResponsiveContainer width="100%" height={320}>
@@ -1162,7 +1176,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
                   <YAxis dataKey="name" type="category" width={130} tick={{ fill: T.textDim, fontSize: 10 }} tickLine={false} axisLine={false} />
                   <Tooltip content={({ active, payload, label }) =>
                     active && payload?.[0] ? (
-                      <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 6, padding: "6px 10px", fontSize: 11, color: T.text }}>
+                      <div style={{ background: T.cardAlt, backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", border: `1px solid ${T.border}`, borderRadius: 10, padding: "6px 10px", fontSize: 11, color: T.text, boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>
                         <div style={{ fontWeight: 700 }}>{label}</div>
                         <div style={{ color: getLevelColor(payload[0].value) }}>Nivel: {payload[0].value}%</div>
                         <div style={{ color: T.textDim }}>{getLevelLabel(payload[0].value)}</div>
@@ -1184,7 +1198,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
               {gardnerSorted.map((g) => {
                 const presentCount = g.indicators.filter(ind => ind.present).length;
                 return (
-                  <div key={g.id} style={{ background: T.card, borderRadius: 12, border: `1px solid ${g.color}22`, padding: 16 }}>
+                  <div key={g.id} style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 16, border: `1px solid ${g.color}33`, padding: 16, boxShadow: `0 2px 20px rgba(0,0,0,0.25)`, transition: "box-shadow 0.2s" }}>
                     {/* Card Header */}
                     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
                       <span style={{ fontSize: 28 }}>{g.icon}</span>
@@ -1230,7 +1244,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
 
                     {/* Strengths & Development */}
                     <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
-                      <div style={{ background: T.bg, borderRadius: 8, padding: 10, border: `1px solid ${T.border}` }}>
+                      <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: 10, border: `1px solid ${T.border}` }}>
                         <div style={{ fontSize: 10, fontWeight: 700, color: T.accent, marginBottom: 5 }}>✓ Manifestaciones</div>
                         {g.strengths.map((s, i) => (
                           <div key={i} style={{ fontSize: 10, color: T.textDim, marginBottom: 3, display: "flex", gap: 5 }}>
@@ -1239,7 +1253,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
                           </div>
                         ))}
                       </div>
-                      <div style={{ background: T.bg, borderRadius: 8, padding: 10, border: `1px solid ${T.border}` }}>
+                      <div style={{ background: "rgba(255,255,255,0.04)", borderRadius: 10, padding: 10, border: `1px solid ${T.border}` }}>
                         <div style={{ fontSize: 10, fontWeight: 700, color: T.warning, marginBottom: 5 }}>→ Desarrollo</div>
                         {g.development.map((d, i) => (
                           <div key={i} style={{ fontSize: 10, color: T.textDim, marginBottom: 3, display: "flex", gap: 5 }}>
@@ -1276,32 +1290,32 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
           <div style={{ display: "flex", gap: 5, flexWrap: "wrap", marginBottom: 14, justifyContent: "center" }}>
             <button onClick={() => setPromptFilter("all")}
               style={{
-                padding: "5px 12px", borderRadius: 6, fontSize: 10, fontWeight: 600,
-                border: promptFilter === "all" ? `1px solid ${T.accent}` : `1px solid ${T.border}`,
-                background: promptFilter === "all" ? T.accentDim : "transparent",
+                padding: "5px 14px", borderRadius: 999, fontSize: 10, fontWeight: 600,
+                border: promptFilter === "all" ? `1px solid rgba(74,157,74,0.5)` : `1px solid ${T.border}`,
+                background: promptFilter === "all" ? T.accentDim : "rgba(255,255,255,0.04)",
                 color: promptFilter === "all" ? T.accent : T.textDim,
-                cursor: "pointer", fontFamily: "inherit",
+                cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
               }}>Todas ({allGaps.length})</button>
             {PROFILES.map(p => {
               const count = allGaps.filter(g => g.type !== "gardner" && g.source === p.name).length;
               return (
                 <button key={p.id} onClick={() => setPromptFilter(p.name)}
                   style={{
-                    padding: "5px 10px", borderRadius: 6, fontSize: 10, fontWeight: 600,
-                    border: promptFilter === p.name ? `1px solid ${p.color}` : `1px solid ${T.border}`,
-                    background: promptFilter === p.name ? p.color + "18" : "transparent",
+                    padding: "5px 10px", borderRadius: 999, fontSize: 10, fontWeight: 600,
+                    border: promptFilter === p.name ? `1px solid ${p.color}66` : `1px solid ${T.border}`,
+                    background: promptFilter === p.name ? p.color + "18" : "rgba(255,255,255,0.04)",
                     color: promptFilter === p.name ? p.color : T.textDim,
-                    cursor: "pointer", fontFamily: "inherit",
+                    cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
                   }}>{p.icon} {count}</button>
               );
             })}
             <button onClick={() => setPromptFilter("gardner")}
               style={{
-                padding: "5px 12px", borderRadius: 6, fontSize: 10, fontWeight: 600,
-                border: promptFilter === "gardner" ? `1px solid ${T.accentAlt}` : `1px solid ${T.border}`,
-                background: promptFilter === "gardner" ? T.accentAlt + "18" : "transparent",
+                padding: "5px 12px", borderRadius: 999, fontSize: 10, fontWeight: 600,
+                border: promptFilter === "gardner" ? `1px solid rgba(59,153,241,0.5)` : `1px solid ${T.border}`,
+                background: promptFilter === "gardner" ? "rgba(59,153,241,0.12)" : "rgba(255,255,255,0.04)",
                 color: promptFilter === "gardner" ? T.accentAlt : T.textDim,
-                cursor: "pointer", fontFamily: "inherit",
+                cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
               }}>🧠 Gardner ({allGaps.filter(g => g.type === "gardner").length})</button>
           </div>
 
@@ -1312,8 +1326,9 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
               const currentPrompt = isEdited ? promptEdits[gap.key] : gap.prompt;
               return (
                 <div key={gap.key} style={{
-                  background: T.card, borderRadius: 12,
-                  border: `1px solid ${gap.sourceColor}22`, overflow: "hidden",
+                  background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+                  borderRadius: 16, border: `1px solid ${gap.sourceColor}33`, overflow: "hidden",
+                  boxShadow: "0 2px 20px rgba(0,0,0,0.25)",
                 }}>
                   {/* Card Header */}
                   <div style={{
@@ -1363,7 +1378,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
                     spellCheck={false}
                     style={{
                       width: "100%", minHeight: 120, maxHeight: 400, padding: "12px 14px",
-                      background: T.bg, color: T.text, border: "none", resize: "vertical",
+                      background: "rgba(10, 15, 20, 0.6)", color: T.text, border: "none", resize: "vertical",
                       fontSize: 11, lineHeight: 1.6, fontFamily: "'JetBrains Mono', 'Fira Code', 'Consolas', monospace",
                       outline: "none",
                     }}
@@ -1377,8 +1392,9 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
 
           {/* Instructions */}
           <div style={{
-            background: T.card, borderRadius: 10, border: `1px solid ${T.border}`,
-            padding: 14, marginTop: 14,
+            background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+            borderRadius: 16, border: `1px solid ${T.border}`,
+            padding: 14, marginTop: 14, boxShadow: "0 4px 24px rgba(0,0,0,0.25)",
           }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: T.accent, marginBottom: 8 }}>
               ⚡ Ciclo de Mejora Continua
@@ -1391,7 +1407,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
                 { step: "4", title: "Aprende y practica", desc: "Sigue el plan, resuelve ejercicios, toma el quiz de autoevaluación" },
                 { step: "5", title: "Itera", desc: "Actualiza tu nivel, ajusta el prompt y repite con la siguiente brecha" },
               ].map((s) => (
-                <div key={s.step} style={{ background: T.bg, borderRadius: 8, padding: 10, border: `1px solid ${T.border}` }}>
+                <div key={s.step} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 10, padding: 10, border: `1px solid ${T.border}` }}>
                   <div style={{ fontSize: 16, fontWeight: 800, color: T.accent, marginBottom: 4 }}>{s.step}</div>
                   <div style={{ fontSize: 11, fontWeight: 700, color: T.text, marginBottom: 2 }}>{s.title}</div>
                   <div style={{ fontSize: 10, color: T.textDim }}>{s.desc}</div>
