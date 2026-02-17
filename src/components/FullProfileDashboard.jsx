@@ -449,7 +449,7 @@ const SkillBar = ({ skill, maxWidth = 200 }) => (
 );
 
 export default function FullProfileDashboard() {
-  const [view, setView] = useState("overview");
+  const [view, setView] = useState("perfil");
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [sortBy, setSortBy] = useState("level");
   const [promptEdits, setPromptEdits] = useState({});
@@ -760,6 +760,7 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
       {/* Navigation */}
       <div style={{ display: "flex", justifyContent: "center", gap: 6, marginBottom: 18, flexWrap: "wrap" }}>
         {[
+          { id: "perfil", label: "👤 Perfil" },
           { id: "overview", label: "Vista General" },
           { id: "radar", label: "Radar" },
           { id: "gaps", label: "Brechas" },
@@ -780,6 +781,144 @@ Responde en español. Sé directo, práctico y orientado a resultados. Usa forma
           >{tab.label}</button>
         ))}
       </div>
+
+      {/* PERFIL PERSONAL */}
+      {view === "perfil" && (
+        <div style={{ maxWidth: 750, margin: "0 auto" }}>
+
+          {/* Hero */}
+          <div style={{ textAlign: "center", marginBottom: 28 }}>
+            <div style={{ width: 80, height: 80, borderRadius: "50%", margin: "0 auto 16px", background: "linear-gradient(135deg, #4a9d4a, #3b99f1)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 36, boxShadow: "0 0 32px rgba(74,157,74,0.4), 0 0 64px rgba(59,153,241,0.2)" }}>
+              🏛️
+            </div>
+            <h1 style={{ fontSize: 28, fontWeight: 800, margin: "0 0 6px", background: "linear-gradient(135deg, #4a9d4a, #3b99f1, #f97316)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              Daniel Yanez
+            </h1>
+            <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginBottom: 12 }}>
+              {["Arquitecto AEC", "CEO · BAC Consulting", "BIM Manager", "Developer"].map((badge, i) => {
+                const colors = [T.accent, T.purple, T.accentAlt, "rgba(255,255,255,0.5)"];
+                const bgs = [T.accentDim, T.purpleDim, "rgba(59,153,241,0.14)", "rgba(255,255,255,0.07)"];
+                return (
+                  <span key={i} style={{ padding: "3px 12px", borderRadius: 999, fontSize: 10, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", background: bgs[i], color: colors[i], border: `1px solid ${colors[i]}44` }}>
+                    {badge}
+                  </span>
+                );
+              })}
+            </div>
+            <p style={{ fontSize: 12, color: T.textDim, margin: 0 }}>
+              Ciudad de México · Feb 2026
+            </p>
+          </div>
+
+          {/* Bio + Misión */}
+          <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 18, border: `1px solid ${T.border}`, padding: "20px 22px", marginBottom: 14, boxShadow: "0 4px 32px rgba(0,0,0,0.3)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+              <span style={{ fontSize: 16 }}>🎯</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.purple, letterSpacing: 1, textTransform: "uppercase" }}>Misión</span>
+            </div>
+            <p style={{ fontSize: 13, color: T.text, lineHeight: 1.7, margin: "0 0 14px" }}>
+              Arquitecto con enfoque en la convergencia de <strong style={{ color: T.accent }}>BIM, automatización e inteligencia artificial</strong> aplicada al sector AEC. Diseño y ejecuto workflows que reducen fricción operativa, conectan disciplinas y generan valor medible en proyectos de construcción complejos.
+            </p>
+            <div style={{ width: "100%", height: 1, background: T.border, marginBottom: 14 }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+              <span style={{ fontSize: 16 }}>📖</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.accentAlt, letterSpacing: 1, textTransform: "uppercase" }}>Bio</span>
+            </div>
+            <p style={{ fontSize: 12, color: T.textDim, lineHeight: 1.75, margin: 0 }}>
+              Formación en arquitectura con especialización progresiva en tecnología AEC: certificaciones BIM (ISO 19650), desarrollo de add-ins en C# y Python para Revit, implementación de pipelines de automatización con n8n, y exploración activa de modelos de IA para visión computacional y NLP en contextos de obra y diseño. Actualmente dirijo <strong style={{ color: T.text }}>BAC Consulting</strong>, estudio en 11 plataformas simultáneas (~25h/semana) y desarrollo herramientas propias que integran mi stack completo.
+            </p>
+          </div>
+
+          {/* BAC Consulting */}
+          <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 18, border: `1px solid rgba(249,115,22,0.25)`, padding: "20px 22px", marginBottom: 14, boxShadow: "0 4px 32px rgba(0,0,0,0.3), 0 0 0 1px rgba(249,115,22,0.08)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
+              <div style={{ width: 36, height: 36, borderRadius: 10, background: T.purpleDim, border: `1px solid rgba(249,115,22,0.3)`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 18 }}>🏢</div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 800, color: T.purple }}>BAC Consulting</div>
+                <div style={{ fontSize: 10, color: T.textDim }}>BIM · Automatización · Consultoría AEC</div>
+              </div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 10 }}>
+              {[
+                { icon: "🏗️", label: "BIM Management", desc: "Implementación ISO 19650, BEP, coordinación multidisciplinaria" },
+                { icon: "⚙️", label: "Automatización AEC", desc: "n8n workflows, integración Revit API, pipelines de datos" },
+                { icon: "🤖", label: "IA Aplicada", desc: "Visión computacional en obra, NLP para docs técnicos, RAG" },
+                { icon: "📊", label: "Consultoría Técnica", desc: "Auditorías BIM, entrenamiento de equipos, estrategia digital" },
+              ].map((s, i) => (
+                <div key={i} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: "12px 14px", border: `1px solid ${T.border}` }}>
+                  <div style={{ fontSize: 20, marginBottom: 6 }}>{s.icon}</div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: T.text, marginBottom: 4 }}>{s.label}</div>
+                  <div style={{ fontSize: 10, color: T.textDim, lineHeight: 1.5 }}>{s.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stack Tecnológico */}
+          <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 18, border: `1px solid ${T.border}`, padding: "20px 22px", marginBottom: 14, boxShadow: "0 4px 32px rgba(0,0,0,0.3)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+              <span style={{ fontSize: 16 }}>🛠️</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.accentAlt, letterSpacing: 1, textTransform: "uppercase" }}>Stack Tecnológico</span>
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              {[
+                { cat: "BIM & Modelado", color: T.accent, items: ["Revit", "Navisworks", "BIM 360", "IFC/OpenBIM", "Dynamo", "Grasshopper"] },
+                { cat: "Desarrollo", color: T.accentAlt, items: ["Python", "C# / .NET", "PyRevit", "Revit API", "JavaScript", "React"] },
+                { cat: "Automatización & DevOps", color: T.purple, items: ["n8n", "Docker", "GitHub Actions", "PostgreSQL", "Grafana", "Loki"] },
+                { cat: "IA & Data", color: "#a78bfa", items: ["OpenCV", "YOLO", "LangChain", "RAG", "Power BI", "Pandas"] },
+              ].map((group, i) => (
+                <div key={i}>
+                  <div style={{ fontSize: 10, fontWeight: 600, color: group.color, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>{group.cat}</div>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    {group.items.map((item, j) => (
+                      <span key={j} style={{ padding: "3px 10px", borderRadius: 999, fontSize: 10, fontWeight: 600, background: group.color + "14", color: group.color, border: `1px solid ${group.color}33` }}>
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stats de la evaluación + CTA */}
+          <div style={{ background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)", borderRadius: 18, border: `1px solid rgba(59,153,241,0.2)`, padding: "20px 22px", boxShadow: "0 4px 32px rgba(0,0,0,0.3)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+              <span style={{ fontSize: 16 }}>📈</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: T.accentAlt, letterSpacing: 1, textTransform: "uppercase" }}>Evaluación Integral · Feb 2026</span>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 18 }}>
+              {[
+                { label: "Promedio Global", value: globalAvg + "%", sub: getLevelLabel(globalAvg), color: getLevelColor(globalAvg) },
+                { label: "Perfiles evaluados", value: PROFILES.length.toString(), sub: "áreas profesionales", color: T.accentAlt },
+                { label: "Competencias", value: PROFILES.reduce((s, p) => s + p.skills.length, 0).toString(), sub: "habilidades medidas", color: T.purple },
+                { label: "Perfil dominante", value: topProfile.icon, sub: topProfile.fullName, color: T.accent },
+              ].map((c, i) => (
+                <div key={i} style={{ background: "rgba(255,255,255,0.04)", borderRadius: 12, padding: "12px 10px", border: `1px solid ${T.border}`, textAlign: "center" }}>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: c.color }}>{c.value}</div>
+                  <div style={{ fontSize: 10, fontWeight: 600, marginTop: 2, color: T.text }}>{c.label}</div>
+                  <div style={{ fontSize: 9, color: T.textDim, marginTop: 1 }}>{c.sub}</div>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setView("overview")}
+              style={{
+                width: "100%", padding: "12px", borderRadius: 12, fontSize: 13, fontWeight: 700,
+                background: "linear-gradient(135deg, rgba(249,115,22,0.8), rgba(234,88,12,0.9))",
+                border: "1px solid rgba(249,115,22,0.5)", color: "#fff",
+                cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
+                boxShadow: "0 4px 20px rgba(249,115,22,0.35)",
+                letterSpacing: 0.5,
+              }}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(249,115,22,0.45)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 4px 20px rgba(249,115,22,0.35)"; }}
+            >
+              Ver Evaluación Completa →
+            </button>
+          </div>
+
+        </div>
+      )}
 
       {/* OVERVIEW */}
       {view === "overview" && (
