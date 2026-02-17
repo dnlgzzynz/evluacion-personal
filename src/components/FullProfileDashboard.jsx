@@ -455,6 +455,7 @@ export default function FullProfileDashboard() {
   const [promptEdits, setPromptEdits] = useState({});
   const [copiedId, setCopiedId] = useState(null);
   const [promptFilter, setPromptFilter] = useState("all");
+  const [promptMode, setPromptMode] = useState("learning"); // "learning" | "research"
 
   const overviewData = useMemo(() =>
     PROFILES.map(p => ({
@@ -690,28 +691,214 @@ Cierra con:
 **Prompt para la siguiente iteración**: [Daniel: pega aquí el prompt de la siguiente brecha identificada en sección 11]`;
   };
 
+  const generateResearchPrompt = (source, gapTitle, context) => {
+    const isGardner = source === "gardner";
+    const isSkill = source === "skill";
+
+    const roleMap = {
+      gardner: `investigador especializado en neurociencia cognitiva, plasticidad cerebral y tecnologías de potenciación de la inteligencia ${context.profileName} — con acceso a los papers más recientes de 2024-2026`,
+      skill: `analista de tendencias tecnológicas y arquitecto de soluciones en ${context.domain}, con visión de lo que los equipos de vanguardia están adoptando HOY en proyectos AEC reales`,
+      profile: `consultor de innovación y estrategia tecnológica para firmas AEC, especializado en identificar qué adoptar, qué descartar y cómo convertir tendencias emergentes en ventaja competitiva para ${context.domain}`,
+    };
+    const role = roleMap[source] || roleMap.profile;
+
+    const focusMap = {
+      gardner: `Mapear el estado del arte en desarrollo de la inteligencia ${context.profileName}: últimas investigaciones, herramientas, técnicas y evidencia científica de qué funciona realmente para potenciarla, conectando todo con el contexto de trabajo de Daniel en BIM/AEC.`,
+      skill: `Identificar qué está cambiando RIGHT NOW en "${gapTitle}": nuevas herramientas, versiones, frameworks alternativos, casos de adopción temprana en AEC y qué debería integrar BAC Consulting en los próximos 6-12 meses.`,
+      profile: `Trazar el horizonte de innovación en ${context.profileName}: qué firmas líderes están haciendo, qué tecnologías están surgiendo, qué gaps existen en el mercado mexicano AEC y cómo BAC puede posicionarse como early adopter estratégico.`,
+    };
+    const focus = focusMap[source] || focusMap.profile;
+
+    return `# RESEARCH PROMPT — INTELIGENCIA COMPETITIVA Y ESTADO DEL ARTE
+## Rol
+Eres ${role}. Tu misión es darle a Daniel una ventaja informacional asimétrica: que sepa cosas que su competencia no sabe todavía. No reportas lo que ya es mainstream — reportas lo que está emergiendo, lo que está fracasando y lo que viene.
+
+## Sujeto de investigación
+**Daniel Yanez** — CEO de BAC Consulting, arquitecto AEC con stack BIM+IA+Automatización.
+- Perfil bajo investigación: **${context.profileName}** | Nivel actual: **${context.avgLevel}%**
+- Fortalezas existentes: ${context.strengths}
+- Stack activo: Revit API (C#/Python), n8n, Docker, LangChain, Power BI, React, ISO 19650
+- Estudia ~25h/semana — necesita filtrar señal del ruido con precisión quirúrgica
+
+## Objeto de investigación
+**"${gapTitle}"** — ${context.profileDesc || context.domain}
+
+## Objetivo
+${focus}
+
+## Reglas de oro (NUNCA las rompas)
+1. **Solo fuentes de 2024-2026**: nada que Daniel ya sepa si lleva 10+ años en AEC
+2. **Datos concretos**: versiones, fechas, porcentajes de adopción, benchmarks — no generalidades
+3. **Opinión experta**: di qué vale la pena, qué es hype y qué es transformador
+4. **Tablas siempre**: comparativas, rankings, matrices — el formato tabla es obligatorio en secciones clave
+5. **Contexto mexicano/LATAM**: qué está pasando específicamente en México y cómo afecta a BAC
+6. **Mermaid para roadmaps y mapas**: usa \`\`\`mermaid para visualizar adopción y tendencias
+7. **Español**: responde en español, términos técnicos EN entre paréntesis
+
+---
+
+## 0. RADAR AHORA MISMO — Señal más caliente (responde esto primero)
+¿Cuál es el desarrollo MÁS RELEVANTE en "${gapTitle}" en los últimos 6 meses (2025-2026)?
+- Una sola cosa, explicada en 3-5 párrafos densos
+- Por qué cambia el juego
+- Por qué Daniel debería saber esto HOY
+- Qué acción concreta puede tomar esta semana
+
+---
+
+## 1. ESTADO DEL ARTE — Dónde está el campo hoy
+Snapshot del dominio en Q1 2026:
+| Dimensión | Estado actual | Tendencia | Horizonte 2027 |
+|---|---|---|---|
+| Madurez tecnológica | … | ↑/↓/→ | … |
+| Adopción en AEC global | … | … | … |
+| Adopción en México/LATAM | … | … | … |
+| Costo de implementación | … | … | … |
+| Curva de aprendizaje | … | … | … |
+| Interoperabilidad con BIM | … | … | … |
+Incluye: **índice de madurez TRL** si aplica, estadísticas de adopción con fuente.
+
+---
+
+## 2. TIMELINE DE DESARROLLOS RECIENTES (2023-2026)
+Los últimos 3 años: qué cambió, qué salió, qué murió:
+| Fecha | Desarrollo | Quién lo lideró | Impacto en AEC | ¿Adoptable ya? |
+|---|---|---|---|---|
+Incluye: releases de software, actualizaciones de estándares, papers influyentes, pivots de empresas líderes.
+Termina con: **"¿Qué viene en los próximos 12 meses?"** — 3 desarrollos esperados con fecha estimada.
+
+---
+
+## 3. HERRAMIENTAS Y PLATAFORMAS EMERGENTES
+Comparativa de lo nuevo vs lo establecido:
+| Herramienta | Tipo | Madurez | Ventaja vs alternativa | Integración stack Daniel | Precio | Veredicto |
+|---|---|---|---|---|---|---|
+Categorías:
+- **Lanzamientos 2024-2026** (nuevos jugadores)
+- **Actualizaciones mayores** de herramientas existentes
+- **Herramientas que están muriendo / siendo reemplazadas**
+- **Open source destacado** que vale la pena evaluar
+Para cada tool relevante: snippet de instalación o integración mínima con el stack de Daniel.
+
+---
+
+## 4. PAPERS, ESTÁNDARES Y PUBLICACIONES CLAVE
+Las 8-10 publicaciones que Daniel DEBE leer (priorizadas):
+| Título | Autores/Org | Año | Por qué importa | Hallazgo principal | Link/DOI |
+|---|---|---|---|---|---|
+Incluye: actualizaciones de normas ISO/BIM, white papers de buildingSMART, Autodesk Research, papers de IEEE/ACM relevantes${isGardner ? ", journals de neurociencia (Nature, Frontiers in Neuroscience)" : ""}.
+
+---
+
+## 5. LÍDERES, REFERENTES Y COMUNIDADES
+¿Quién está definiendo el futuro de este campo?
+| Nombre / Organización | Rol | Por qué seguirlos | Dónde encontrarlos | Relevancia para BAC |
+|---|---|---|---|---|
+Incluye: investigadores, firmas AEC innovadoras, startups, comunidades open source, grupos de LinkedIn/Discord activos.
+**Top 3 cuentas de X/LinkedIn** que Daniel debería seguir ahora mismo — con justificación de cada una.
+
+---
+
+## 6. CASOS DE USO PIONEROS EN AEC
+Proyectos y empresas que ya están implementando esto con resultados medibles:
+| Proyecto / Empresa | País | Qué hicieron | Resultados obtenidos | Tecnología usada | Replicable en BAC |
+|---|---|---|---|---|---|
+Prioriza: casos de LATAM o similares a escala BAC. Si no hay LATAM, usa casos de España o contexto hispanoparlante.
+Para el caso más relevante: **análisis detallado** (problema → solución → implementación → resultado → lección).
+
+---
+
+## 7. GAPS EN EL MERCADO MEXICANO AEC
+Qué oportunidades concretas existen en México que nadie (o pocos) están aprovechando:
+| Oportunidad | Vacío actual | Quién lo necesita | Tamaño estimado de mercado | Tiempo para capturarlo | Riesgo |
+|---|---|---|---|---|---|
+Enfoque en: constructoras mexicanas, despachos de arquitectura, dependencias de gobierno (infraestructura pública), desarrolladores inmobiliarios.
+**Propuesta de posicionamiento BAC**: cómo articular este gap como servicio o producto diferenciado.
+
+---
+
+## 8. ANÁLISIS DE ADOPCIÓN — Costo / Beneficio / Riesgo
+Para que Daniel tome decisiones de inversión informadas:
+| Factor | Detalle | Impacto en BAC |
+|---|---|---|
+| Costo de adopción (tiempo) | … | … |
+| Costo de adopción (dinero) | … | … |
+| Tiempo hasta primer resultado medible | … | … |
+| ROI estimado a 12 meses | … | … |
+| Riesgo de no adoptar | … | … |
+| Riesgo de adoptar demasiado pronto | … | … |
+| Prerequisitos técnicos | … | … |
+Veredicto final: **¿Adoptar ahora / En 6 meses / Monitorear / Descartar?** — con justificación de 3-5 líneas.
+
+---
+
+## 9. RIESGOS, OBSOLESCENCIA Y SEÑALES DE ALERTA
+¿Qué podría hacer obsoleto este conocimiento? ¿Qué hay que monitorear?
+| Riesgo / Amenaza | Probabilidad | Horizonte temporal | Señal de alerta temprana | Mitigación |
+|---|---|---|---|---|
+Incluye: tecnologías sustitutas, cambios regulatorios esperados, movimientos de vendors clave, tendencias que podrían eliminar la necesidad de este skill.
+**Pregunta crítica**: ¿En 3 años este conocimiento será más valioso o menos valioso? ¿Por qué?
+
+---
+
+## 10. HOJA DE RUTA DE ADOPCIÓN PARA BAC
+Plan concreto de cómo BAC Consulting integra esto:
+\`\`\`mermaid
+gantt
+  title Adopción en BAC — Roadmap 12 meses
+  dateFormat YYYY-MM
+  section Exploración
+    ...
+  section Piloto
+    ...
+  section Producción
+    ...
+\`\`\`
+| Fase | Acción | Recursos necesarios | Entregable | KPI de éxito |
+|---|---|---|---|---|
+| Mes 1-2 Exploración | … | … | … | … |
+| Mes 3-4 Piloto | … | … | … | … |
+| Mes 5-8 Implementación | … | … | … | … |
+| Mes 9-12 Escala | … | … | … | … |
+
+---
+
+## 11. PROPUESTA DE INVESTIGACIÓN / CONTRIBUCIÓN PROPIA
+¿Dónde Daniel podría generar conocimiento nuevo que no existe (o existe mal documentado)?
+- **Nicho de investigación sin explorar**: qué pregunta nadie ha respondido bien todavía
+- **Hipótesis de trabajo**: qué cree Daniel que podría ser verdad (basado en su experiencia) y podría validar
+- **Metodología mínima**: cómo hacer un experimento o estudio en 30-60 días con sus proyectos reales de BAC
+- **Output potencial**: artículo técnico, repositorio open source, template, plugin, paper
+- **Audiencia y distribución**: dónde publicarlo para máximo impacto (LinkedIn, buildingSMART, GitHub, ArXiv)
+
+---
+
+## 12. SISTEMA DE MONITOREO CONTINUO
+Para que Daniel no pierda el hilo después de esta sesión:
+| Fuente | Tipo | Frecuencia | Qué buscar | Cómo configurar alerta |
+|---|---|---|---|---|
+Incluye: newsletters, RSS feeds, repositorios GitHub que seguir, hashtags, alertas de Google Scholar.
+**Setup en 15 minutos**: instrucciones paso a paso para configurar un sistema de monitoreo mínimo viable que consuma <30 min/semana y capture el 80% de las novedades relevantes.
+**Prompt de re-investigación**: genera aquí un prompt que Daniel pueda usar en 3-6 meses para hacer una nueva pasada de investigación sobre este mismo tema y comparar contra lo que sabe hoy.`;
+  };
+
   const allGaps = useMemo(() => {
     const gaps = [];
     PROFILES.forEach(p => {
       const avg = getAvg(p.skills);
+      const ctx = (title, extra = {}) => ({
+        domain: p.description, profileName: p.name, profileDesc: p.description,
+        avgLevel: avg, strengths: p.strengths.join("; "),
+        tools: p.skills.filter(s => s.level >= 70).map(s => s.name).join(", ") || "en desarrollo",
+        ...extra,
+      });
       p.gaps.forEach((g, i) => {
         const key = `profile-${p.id}-gap-${i}`;
+        const c = ctx(g, { currentLevel: getLevelLabel(avg) });
         gaps.push({
-          key,
-          type: "profile",
-          source: p.name,
-          sourceIcon: p.icon,
-          sourceColor: p.color,
-          title: g,
-          prompt: generatePrompt("profile", g, {
-            domain: p.description,
-            profileName: p.name,
-            profileDesc: p.description,
-            currentLevel: getLevelLabel(avg),
-            avgLevel: avg,
-            strengths: p.strengths.join("; "),
-            tools: p.skills.filter(s => s.level >= 70).map(s => s.name).join(", ") || "en desarrollo",
-          }),
+          key, type: "profile", source: p.name, sourceIcon: p.icon, sourceColor: p.color, title: g,
+          prompt: generatePrompt("profile", g, c),
+          researchPrompt: generateResearchPrompt("profile", g, c),
         });
       });
       const sortedSkills = [...p.skills].sort((a, b) => (b.target - b.level) - (a.target - a.level));
@@ -719,45 +906,30 @@ Cierra con:
         const gap = sk.target - sk.level;
         if (gap >= 15) {
           const key = `profile-${p.id}-skill-${i}`;
+          const c = ctx(sk.name, { currentLevel: `${sk.level}% (objetivo: ${sk.target}%)` });
           gaps.push({
-            key,
-            type: "skill",
-            source: p.name,
-            sourceIcon: p.icon,
-            sourceColor: p.color,
+            key, type: "skill", source: p.name, sourceIcon: p.icon, sourceColor: p.color,
             title: `${sk.name} (${sk.level}% → ${sk.target}%, gap: ${gap}pts)`,
-            prompt: generatePrompt("skill", sk.name, {
-              domain: p.description,
-              profileName: p.name,
-              profileDesc: p.description,
-              currentLevel: `${sk.level}% (objetivo: ${sk.target}%)`,
-              avgLevel: avg,
-              strengths: p.strengths.join("; "),
-              tools: p.skills.filter(s => s.level >= 70).map(s => s.name).join(", ") || "en desarrollo",
-            }),
+            prompt: generatePrompt("skill", sk.name, c),
+            researchPrompt: generateResearchPrompt("skill", sk.name, c),
           });
         }
       });
     });
-    GARDNER.forEach((g, gi) => {
+    GARDNER.forEach((g) => {
       g.development.forEach((d, i) => {
         const key = `gardner-${g.id}-dev-${i}`;
+        const c = {
+          domain: `inteligencia ${g.name.toLowerCase()} (Gardner)`,
+          profileName: `Inteligencia ${g.name}`, profileDesc: g.description,
+          currentLevel: `${g.level}% - ${getLevelLabel(g.level)}`, avgLevel: g.level,
+          strengths: g.strengths.join("; "),
+          tools: g.indicators.filter(ind => ind.present).map(ind => ind.name).join(", "),
+        };
         gaps.push({
-          key,
-          type: "gardner",
-          source: g.name,
-          sourceIcon: g.icon,
-          sourceColor: g.color,
-          title: d,
-          prompt: generatePrompt("gardner", d, {
-            domain: `inteligencia ${g.name.toLowerCase()} (Gardner)`,
-            profileName: `Inteligencia ${g.name}`,
-            profileDesc: g.description,
-            currentLevel: `${g.level}% - ${getLevelLabel(g.level)}`,
-            avgLevel: g.level,
-            strengths: g.strengths.join("; "),
-            tools: g.indicators.filter(ind => ind.present).map(ind => ind.name).join(", "),
-          }),
+          key, type: "gardner", source: g.name, sourceIcon: g.icon, sourceColor: g.color, title: d,
+          prompt: generatePrompt("gardner", d, c),
+          researchPrompt: generateResearchPrompt("gardner", d, c),
         });
       });
     });
@@ -1480,15 +1652,43 @@ Cierra con:
       {/* PROMPTS */}
       {view === "prompts" && (
         <div style={{ maxWidth: 850, margin: "0 auto" }}>
+
+          {/* Mode switcher */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 8, marginBottom: 18 }}>
+            {[
+              { id: "learning", icon: "📚", label: "Aprendizaje", desc: "Cerrar brechas · dominio técnico", accent: T.accent, accentDim: T.accentDim, border: "rgba(74,157,74,0.5)" },
+              { id: "research", icon: "🔬", label: "Investigación", desc: "Estado del arte · nuevas herramientas", accent: T.purple, accentDim: T.purpleDim, border: "rgba(249,115,22,0.5)" },
+            ].map(m => (
+              <button key={m.id} onClick={() => setPromptMode(m.id)}
+                style={{
+                  padding: "10px 22px", borderRadius: 14, fontSize: 12, fontWeight: 700,
+                  border: promptMode === m.id ? `1px solid ${m.border}` : `1px solid ${T.border}`,
+                  background: promptMode === m.id ? m.accentDim : "rgba(255,255,255,0.04)",
+                  backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
+                  color: promptMode === m.id ? m.accent : T.textDim,
+                  cursor: "pointer", fontFamily: "inherit", transition: "all 0.2s",
+                  boxShadow: promptMode === m.id ? `0 0 18px ${m.border}55` : "none",
+                  display: "flex", flexDirection: "column", alignItems: "center", gap: 2, minWidth: 140,
+                }}
+              >
+                <span style={{ fontSize: 20 }}>{m.icon}</span>
+                <span>{m.label}</span>
+                <span style={{ fontSize: 9, fontWeight: 400, opacity: 0.7 }}>{m.desc}</span>
+              </button>
+            ))}
+          </div>
+
           <div style={{ textAlign: "center", marginBottom: 16 }}>
             <h2 style={{ fontSize: 16, fontWeight: 800, margin: "0 0 4px" }}>
-              ⚡ System Prompts Maestros por Brecha
+              {promptMode === "learning" ? "📚 Prompts de Aprendizaje" : "🔬 Prompts de Investigación"}
             </h2>
             <p style={{ fontSize: 11, color: T.textDim, margin: "0 0 4px" }}>
-              Prompts editables para Perplexity / Claude — ciclo de mejora continua
+              {promptMode === "learning"
+                ? "Cerrar brechas · dominio técnico · ciclo de mejora continua"
+                : "Estado del arte · herramientas emergentes · oportunidades de mercado BAC"}
             </p>
             <p style={{ fontSize: 10, color: T.textDim, margin: 0 }}>
-              {allGaps.length} brechas identificadas · Copia → Pega en tu IA → Aprende → Repite
+              {allGaps.length} brechas · Copia → Pega en Claude / Perplexity → {promptMode === "learning" ? "Aprende" : "Investiga"} → Repite
             </p>
           </div>
 
@@ -1528,8 +1728,10 @@ Cierra con:
           {/* Prompt Cards */}
           <div style={{ display: "grid", gap: 10 }}>
             {filteredGaps.map((gap) => {
-              const isEdited = promptEdits[gap.key] !== undefined;
-              const currentPrompt = isEdited ? promptEdits[gap.key] : gap.prompt;
+              const editKey = promptMode === "research" ? `r-${gap.key}` : gap.key;
+              const basePrompt = promptMode === "research" ? gap.researchPrompt : gap.prompt;
+              const isEdited = promptEdits[editKey] !== undefined;
+              const currentPrompt = isEdited ? promptEdits[editKey] : basePrompt;
               return (
                 <div key={gap.key} style={{
                   background: T.card, backdropFilter: "blur(12px)", WebkitBackdropFilter: "blur(12px)",
@@ -1548,8 +1750,15 @@ Cierra con:
                         <div style={{ fontSize: 12, fontWeight: 700, color: T.text, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                           {gap.title}
                         </div>
-                        <div style={{ fontSize: 10, color: T.textDim }}>
+                        <div style={{ fontSize: 10, color: T.textDim, display: "flex", alignItems: "center", gap: 6 }}>
                           {gap.source} · {gap.type === "gardner" ? "Gardner" : gap.type === "skill" ? "Skill gap" : "Brecha"}
+                          <span style={{ padding: "1px 6px", borderRadius: 999, fontSize: 9, fontWeight: 700,
+                            background: promptMode === "research" ? T.purpleDim : T.accentDim,
+                            color: promptMode === "research" ? T.purple : T.accent,
+                            border: `1px solid ${promptMode === "research" ? "rgba(249,115,22,0.3)" : "rgba(74,157,74,0.3)"}`,
+                          }}>
+                            {promptMode === "research" ? "🔬 Research" : "📚 Learn"}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -1557,7 +1766,7 @@ Cierra con:
                       {isEdited && (
                         <button onClick={() => {
                           const next = { ...promptEdits };
-                          delete next[gap.key];
+                          delete next[editKey];
                           setPromptEdits(next);
                         }}
                           style={{
@@ -1566,21 +1775,21 @@ Cierra con:
                             color: T.textDim, cursor: "pointer", fontFamily: "inherit",
                           }}>Reset</button>
                       )}
-                      <button onClick={() => copyToClipboard(gap.key, currentPrompt)}
+                      <button onClick={() => copyToClipboard(editKey, currentPrompt)}
                         style={{
                           padding: "4px 10px", borderRadius: 5, fontSize: 10, fontWeight: 700,
-                          border: copiedId === gap.key ? `1px solid ${T.accent}` : `1px solid ${gap.sourceColor}66`,
-                          background: copiedId === gap.key ? T.accentDim : gap.sourceColor + "18",
-                          color: copiedId === gap.key ? T.accent : gap.sourceColor,
+                          border: copiedId === editKey ? `1px solid ${T.accent}` : `1px solid ${gap.sourceColor}66`,
+                          background: copiedId === editKey ? T.accentDim : gap.sourceColor + "18",
+                          color: copiedId === editKey ? T.accent : gap.sourceColor,
                           cursor: "pointer", fontFamily: "inherit", transition: "all 0.15s",
-                        }}>{copiedId === gap.key ? "✓ Copiado" : "Copiar"}</button>
+                        }}>{copiedId === editKey ? "✓ Copiado" : "Copiar"}</button>
                     </div>
                   </div>
 
                   {/* Editable Prompt */}
                   <textarea
                     value={currentPrompt}
-                    onChange={(e) => setPromptEdits({ ...promptEdits, [gap.key]: e.target.value })}
+                    onChange={(e) => setPromptEdits({ ...promptEdits, [editKey]: e.target.value })}
                     spellCheck={false}
                     style={{
                       width: "100%", minHeight: 120, maxHeight: 400, padding: "12px 14px",
